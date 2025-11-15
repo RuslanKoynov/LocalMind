@@ -1,0 +1,29 @@
+<!-- index.html (обновлённая версия) -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LocalMind — Локальный ИИ для знаний</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>🧠 LocalMind</h1>
+    <div class="upload-box">
+        <h3>📁 Загрузить документ</h3>
+        <p>Поддерживаемые форматы: <code>.txt</code>, <code>.md</code>, <code>.pdf</code>, <code>.docx</code></p>
+        <input type="file" id="fileInput" accept=".txt,.md,.pdf,.docx" multiple>
+        <button onclick="uploadFile()">Загрузить</button>
+        <p id="uploadStatus"></p>
+    </div>
+
+    <div class="query-box">
+        <h3>❓ Задать вопрос</h3>
+        <textarea id="question" placeholder="Например: Какие шаги настройки системы?" rows="3"></textarea>
+        <button onclick="askQuestion()">Найти ответ</button>
+    </div>
+
+    <div id="result"></div>
+    <script src="/static/main.js"></script>
+</body>
+</html>
