@@ -22,7 +22,7 @@
 
 3. **Download the project** (or clone the repository):
    ```bash
-   git clone https://github.com/your-username/localmind.git
+   git clone https://github.com/RuslanKoynov/LocalMind.git
    cd localmind
    ```
 
