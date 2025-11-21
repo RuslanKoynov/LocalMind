@@ -1,29 +1,60 @@
-<!-- index.html (обновлённая версия) -->
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>LocalMind — Локальный ИИ для знаний</title>
+    <title>LocalMind — Ваш локальный ИИ-ассистент</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 </head>
 <body>
-    <h1>🧠 LocalMind</h1>
-    <div class="upload-box">
-        <h3>📁 Загрузить документ</h3>
-        <p>Поддерживаемые форматы: <code>.txt</code>, <code>.md</code>, <code>.pdf</code>, <code>.docx</code></p>
-        <input type="file" id="fileInput" accept=".txt,.md,.pdf,.docx" multiple>
-        <button onclick="uploadFile()">Загрузить</button>
-        <p id="uploadStatus"></p>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-content">
+                <h1>🧠 LocalMind</h1>
+                <div class="header-actions">
+                    <div class="lang-select">
+        <select id="languageSelect" aria-label="RU/EN">
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="en">🇬🇧 English</option>
+        </select>
+    </div>
+                    <div class="theme-toggle">
+                        <button id="themeToggle" aria-label="Переключить тему">
+                            ☀️🌛
+                            </button>
+                    </div>
+                    <button id="clearBtn" class="clear-btn">🗑️Очистить чат</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-messages" class="chat-messages">
+            <div class="message assistant">
+                <div class="message-content">
+                    Привет! Я могу отвечать на вопросы по вашим документам.<br>
+                    Сначала загрузите файлы (PDF, DOCX, TXT, MD), а затем задавайте вопросы.
+                </div>
+            </div>
+            <!-- Индикатор "ИИ печатает..." будет добавлен сюда через JavaScript -->
+        </div>
+
+        <div class="upload-section">
+            <input type="file" id="fileInput" accept=".txt,.md,.pdf,.docx" multiple>
+            <button id="uploadBtn">Загрузить файлы</button>
+            <div id="uploadStatus"></div>
+        </div>
+
+        <div class="input-area">
+            <textarea id="userInput" placeholder="Введите ваш вопрос..." rows="1"></textarea>
+            <button id="sendBtn">🔍</button>
+        </div>
     </div>
 
-    <div class="query-box">
-        <h3>❓ Задать вопрос</h3>
-        <textarea id="question" placeholder="Например: Какие шаги настройки системы?" rows="3"></textarea>
-        <button onclick="askQuestion()">Найти ответ</button>
-    </div>
-
-    <div id="result"></div>
     <script src="/static/main.js"></script>
+    <footer class="app-footer">
+        <p>© <span id="current-year">2025</span> LocalMind. Все права защищены.</p>
+    </footer>
 </body>
 </html>
