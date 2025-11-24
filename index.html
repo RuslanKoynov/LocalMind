@@ -45,7 +45,16 @@
             <button id="uploadBtn">Загрузить файлы</button>
             <div id="uploadStatus"></div>
         </div>
-
+	
+	<div class="settings-bar">
+    <label id="tempLabel" for="tempSelect">Температура:</label>
+    <select id="tempSelect" aria-label="Температура генерации">
+        <option id="tempVal1" value="0.0">0.0</option>
+        <option id="tempVal2" value="0.3" selected>0.3</option>
+        <option id="tempVal3" value="0.7">0.7</option>
+        <option id="tempVal4" value="1.0">1.0</option>
+    </select>
+</div>
         <div class="input-area">
             <textarea id="userInput" placeholder="Введите ваш вопрос..." rows="1"></textarea>
             <button id="sendBtn">🔍</button>

@@ -392,3 +392,30 @@ body {
 .lang-select select:focus {
     outline: none;
 }
+
+/* === Настройка температуры === */
+
+.settings-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.settings-bar select {
+    padding: 4px 8px;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.settings-bar select:focus {
+    outline: none;
+    border-color: var(--button-primary);
+}

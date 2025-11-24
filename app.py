@@ -11,6 +11,7 @@ from sentence_transformers import SentenceTransformer
 import aiofiles
 from typing import List
 import requests
+from pydantic import BaseModel
 
 # PDF & DOCX
 from PyPDF2 import PdfReader
@@ -32,6 +33,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class QueryRequest(BaseModel):
+    question: str
+    temperature: float = 0.3
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -82,17 +87,8 @@ def extract_text_from_file(filepath: str, ext: str) -> str:
         print(f"Ошибка извлечения текста из {filepath}: {e}")
         return ""
 
-def ask_ollama(context: str, question: str, model: str = "qwen2.5:0.5b") -> str:
 #def ask_ollama(context: str, question: str, model: str = "phi3:mini") -> str:
-    prompt = f"""Ты — умный помощник по документации. Ответь чётко и по делу, используя ТОЛЬКО приведённый ниже контекст.
-Если в контексте нет ответа, напиши: "В загруженных документах ответ не найден."
-
-Контекст:
-{context}
-
-Вопрос: {question}
-
-Ответ:"""
+def ask_ollama_with_temp(prompt: str, temperature: float = 0.3, model: str = "phi3:mini") -> str:
     try:
         response = requests.post(
             "http://localhost:11434/api/generate",
@@ -100,14 +96,17 @@ def ask_ollama(context: str, question: str, model: str = "qwen2.5:0.5b") -> str:
                 "model": model,
                 "prompt": prompt,
                 "stream": False,
-                "options": {"temperature": 0.2}
+                "options": {"temperature": temperature}
             },
             timeout=120
         )
-        return response.json().get("response", "Ошибка генерации.").strip()
+        if response.status_code != 200:
+            return f"Ollama error {response.status_code}: {response.text}"
+        data = response.json()
+        return data.get("response", "Поле 'response' отсутствует в ответе Ollama.").strip()
     except Exception as e:
-        return f"Ошибка: Ollama не отвечает. Запущен ли он? ({str(e)})"
-
+        return f"Исключение при запросе к Ollama: {str(e)}"
+        
 # === Эндпоинты ===
 
 @app.post("/upload")
@@ -173,34 +172,56 @@ async def upload_files(files: List[UploadFile] = File(...)):
     }
 
 @app.post("/query")
-async def query_knowledge(question: str = Form(...)):
-    if not question.strip():
+async def query_knowledge(request: QueryRequest):
+    question = request.question.strip()
+    temperature = min(max(request.temperature, 0.0), 1.0)  # Ограничиваем [0.0, 1.0]
+
+    if not question:
         raise HTTPException(status_code=400, detail="Вопрос не может быть пустым")
-    
+
+    # Проверка наличия документов
     results = collection.peek()
     if results['ids'] == []:
-        return {"answer": "База знаний пуста. Загрузите документы."}
-    
+        return {"answer": "База знаний пуста. Загрузите документы.", "sources": []}
+
+    # Поиск по вопросу
     query_emb = embedding_model.encode([question]).tolist()[0]
     search_results = collection.query(query_embeddings=[query_emb], n_results=3)
-    
+
     docs = search_results['documents'][0]
     metas = search_results['metadatas'][0]
-    
+
     if not docs:
-        return {"answer": "Ничего не найдено."}
-    
+        return {"answer": "Ничего не найдено.", "sources": []}
+
+    # Контекст из документов
     context = "\n\n".join([f"[Источник: {m['source']}]\n{d}" for d, m in zip(docs, metas)])
-    answer = ask_ollama(context, question)
-    
+
+    # Промпт БЕЗ истории
+    prompt = f"""Ты — специалист по поиску информации в документации. Твоя задача — дать точный и четкий ответ на вопрос пользователя, используя ТОЛЬКО предоставленный контекст.
+
+Правила:
+1.  Если ответ на вопрос есть в контексте — дай его, указав номер раздела или главы, откуда взята информация.
+2.  Если в контексте недостаточно информации для полного ответа — скажи, что именно отсутствует.
+3.  Если ответа в контексте нет вообще — прямо сообщи: «В предоставленной документации эта информация не найдена».
+4.  Запрещено использовать свои знания, не содержащиеся в контексте. Не предполагай и не додумывай.
+5.  Запрещено выходить за рамки предоставленного контекста."
+
+Контекст:
+{context}
+
+Вопрос: {question}
+
+Ответ:"""
+
+    answer = ask_ollama_with_temp(prompt, temperature)
     sources = list(set([m['source'] for m in metas]))
-    
+
     return {
-        "question": question,
         "answer": answer,
         "sources": sources
     }
-
+    
 # Отдаём веб-интерфейс
 @app.get("/", response_class=HTMLResponse)
 async def get_ui():

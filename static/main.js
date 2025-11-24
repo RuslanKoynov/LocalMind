@@ -19,7 +19,8 @@ const translations = {
         clearChat: "Очистить чат",
         noAnswer: "❌ Не удалось получить ответ. Проверьте, запущен ли сервер и Ollama.",
         uploading: "Загрузка",
-        files: "файлов"
+        files: "файлов",
+        tempLabel: "Температура ИИ:",
     },
     en: {
         welcome: "Hi! I can answer questions about your documents.\nFirst, upload files (PDF, DOCX, TXT, MD), then ask questions.",
@@ -35,7 +36,8 @@ const translations = {
         clearChat: "Clear chat",
         noAnswer: "❌ Failed to get a response. Please check if the server and Ollama are running.",
         uploading: "Uploading",
-        files: "files"
+        files: "files",
+        tempLabel: "AI Temperature:",
     }
 };
 
@@ -66,6 +68,7 @@ function updateUIText() {
     document.getElementById('userInput').placeholder = t('placeholder');
     document.getElementById('uploadBtn').textContent = t('uploadLabel');
     document.getElementById('clearBtn').textContent = t('clearChat');
+    document.getElementById('tempLabel').textContent = t('tempLabel');
     
     // Приветственное сообщение (если чат пуст)
     const messages = document.getElementById('chat-messages');
@@ -109,6 +112,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('languageSelect')?.addEventListener('change', (e) => {
         setLanguage(e.target.value);
+    });
+    
+    const savedTemp = localStorage.getItem('localmind-temperature') || '0.3';
+    document.getElementById('tempSelect').value = savedTemp;
+    
+    document.getElementById('tempSelect').addEventListener('change', (e) => {
+        localStorage.setItem('localmind-temperature', e.target.value);
     });
 });
 
@@ -212,6 +222,7 @@ async function sendQuestion() {
     const input = document.getElementById('userInput');
     const question = input.value.trim();
     const sendBtn = document.getElementById('sendBtn');
+    const temperature = parseFloat(document.getElementById('tempSelect').value);
 
     if (!question || isProcessing) return;
 
@@ -224,17 +235,21 @@ async function sendQuestion() {
     showTypingIndicator();
 
     try {
+        // Отправляем ТОЛЬКО вопрос и температуру (без истории!)
         const res = await fetch('/query', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `question=${encodeURIComponent(question)}`
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question: question,
+                temperature: temperature
+            })
         });
         const data = await res.json();
         hideTypingIndicator();
         addAIResponse(data.answer, data.sources);
     } catch (e) {
         hideTypingIndicator();
-        addAIResponse(t('noAnswer'));
+        addAIResponse("❌ Не удалось получить ответ. Проверьте, запущен ли сервер и Ollama.");
     } finally {
         sendBtn.disabled = false;
         isProcessing = false;
