@@ -7,31 +7,22 @@
 ## 📦 Installation
 
 ### Requirements
-- OS: Windows, macOS, or Linux  
-- Python 3.10 or newer  
+- OS: Windows
 - [Ollama](https://ollama.com/) — to run the large language model (LLM)  
 - At least 4 GB RAM (8 GB+ recommended for larger models)
 
 ### Steps
 
-1. **Install Python** (if not already installed):  
-   [https://www.python.org/downloads/](https://www.python.org/downloads/)
-
-2. **Install Ollama**:  
-   Follow the instructions at [https://ollama.com/](https://ollama.com/)
-
-3. **Download the project** (or clone the repository):
+1. **Download the project** (or clone the repository):
    ```bash
    git clone https://github.com/RuslanKoynov/LocalMind.git
    cd localmind
    ```
 
-4. **Install Python dependencies**:
-   ```bash
-   pip install fastapi uvicorn chromadb sentence-transformers python-multipart PyPDF2 python-docx
-   ```
+2. **Install Ollama**:  
+   Follow the instructions at [https://ollama.com/](https://ollama.com/)
 
-5. **Pull a language model into Ollama** (choose one):
+3. **Pull a language model into Ollama** (choose one):
 
    For best Russian language support:
    ```bash
@@ -45,42 +36,11 @@
 
 ---
 
-## ⚙️ Configuration
-
-### Optional Settings
-
-To use a different LLM, edit the **`app.py`** file:
-
-1. Locate the `ask_ollama(...)` function
-2. Change the default `model` parameter:
-
-   ```python
-   def ask_ollama(context: str, question: str, model: str = "qwen2:1.5b") -> str:
-   ```
-
-   Replace it with a model name that appears in your `ollama list`.
-
-### Project Directories
-
-- `documents/` — stores original uploaded files (created automatically)  
-- `chroma_db/` — local vector knowledge base (created automatically)  
-- `static/` — CSS and JavaScript for the web interface  
-
-> All data remains on your device and **never leaves your system**.
-
----
-
 ## 🚀 Usage
 
 ### 1. Start the Server
 
-In your terminal, navigate to the project folder and run:
-
-```bash
-uvicorn app:app --host 127.0.0.1 --port 8000
-```
-
-> Add the `--reload` flag during development.
+Run LocalMindBox.exe
 
 The application will be available at:  
 👉 [http://127.0.0.1:8000](http://127.0.0.1:8000)
@@ -126,24 +86,7 @@ The higher the value, the more "imagination" (or creativity) the AI will use in 
 | “Generation error” | Ensure Ollama is running and the model is loaded (`ollama list`) |
 | PDF files fail to upload | Make sure the PDF contains selectable text (not a scanned image) |
 | Slow first launch | The embedding model downloads on first run (internet required once) |
-| Server fails to start | Verify all Python dependencies are installed (`pip list`) |
-
----
-
-## 📁 Project Structure
-
-```
-localmind/
-├── app.py                 # Main backend (FastAPI)
-├── LocalMindBox.exe       # Main backend (Executable Windows file)
-├── index.html             # Web UI
-├── static/
-│   ├── style.css          # Styles
-│   ├── main.js            # Frontend logic
-│   └── favicon.ico        # Иконка вкладки браузера
-├── documents/             # Uploaded files
-└── chroma_db/             # Vector knowledge base
-```
+| Server fails to start | Contact me, will try to help 😎 |
 
 ---
 
