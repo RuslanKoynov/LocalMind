@@ -28,7 +28,7 @@
 
 4. **Install Python dependencies**:
    ```bash
-   pip install fastapi uvicorn chromadb sentence-transformers python-multipart PyPDF2 python-docx
+   pip install streamlit chromadb sentence-transformers PyPDF2 python-docx networkx torchvision requests
    ```
 
 5. **Pull a language model into Ollama** (choose one):
@@ -49,22 +49,15 @@
 
 ### Optional Settings
 
-To use a different LLM, edit the **`app.py`** file:
-
-1. Locate the `ask_ollama(...)` function
-2. Change the default `model` parameter:
-
-   ```python
-   def ask_ollama(context: str, question: str, model: str = "qwen2:1.5b") -> str:
-   ```
-
-   Replace it with a model name that appears in your `ollama list`.
+You can change the LLM models directly in the application sidebar:
+- **Chat Model**: Used to generate the final answer.
+- **Graph Model**: Used to extract entities and relationships for the knowledge graph. (For better results, use a more capable model like `qwen2.5` or `llama3`).
 
 ### Project Directories
 
 - `documents/` — stores original uploaded files (created automatically)  
 - `chroma_db/` — local vector knowledge base (created automatically)  
-- `static/` — CSS and JavaScript for the web interface  
+- `knowledge_graph.json` — local knowledge graph (created automatically)
 
 > All data remains on your device and **never leaves your system**.
 
@@ -72,41 +65,33 @@ To use a different LLM, edit the **`app.py`** file:
 
 ## 🚀 Usage
 
-### 1. Start the Server
+### 1. Start the Application
 
 In your terminal, navigate to the project folder and run:
 
 ```bash
-uvicorn app:app --host 127.0.0.1 --port 8000
+streamlit run app.py
 ```
-
-> Add the `--reload` flag during development.
-
-The application will be available at:  
-👉 [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ### 2. Upload Documents
 
 - Supported formats: `.txt`, `.md`, `.pdf`, `.docx`  
 - You can upload **one or multiple files at once**  
-- Files are automatically indexed after upload (may take a few seconds)
+- Files are automatically indexed into both the **Vector Database** and the **Knowledge Graph**.
 
 ### 3. Ask Questions
 
-- Type your question in the “Ask a question” field  
-- The AI analyzes your documents and returns an answer **with source references**  
-- If the answer isn’t found in your documents, the system will let you know
+- Type your question in the chat input field  
+- The AI uses a **Hybrid RAG (Vector + Graph)** approach:
+    - **Vector Search**: Finds the most relevant text chunks.
+    - **Graph Expansion**: Finds related entities and connections to provide a broader context.
+- The AI returns an answer **with source references**.
 
 ### 4. Example Queries
 
 - “What are the system installation requirements?”  
 - “Who is the author of the ‘User Guide’ document?”  
-- “List the setup steps for module X.”  
 - “Who is Tatyana Larina?” (if you’ve uploaded *Eugene Onegin*)
-
-### 5. AI Temperature Setting
-
-The higher the value, the more "imagination" (or creativity) the AI will use in its responses. For text-based document search, a value of 0.3 is usually sufficient.
 
 ---
 
@@ -114,8 +99,7 @@ The higher the value, the more "imagination" (or creativity) the AI will use in 
 
 - All computation happens **locally on your machine**  
 - No data is transmitted over the internet (after initial model download)  
-- The vector database is stored on your local disk  
-- Safe for use in corporate environments with strict data policies
+- The vector database and knowledge graph are stored on your local disk  
 
 ---
 
@@ -126,7 +110,6 @@ The higher the value, the more "imagination" (or creativity) the AI will use in 
 | “Generation error” | Ensure Ollama is running and the model is loaded (`ollama list`) |
 | PDF files fail to upload | Make sure the PDF contains selectable text (not a scanned image) |
 | Slow first launch | The embedding model downloads on first run (internet required once) |
-| Server fails to start | Verify all Python dependencies are installed (`pip list`) |
 
 ---
 
@@ -134,15 +117,12 @@ The higher the value, the more "imagination" (or creativity) the AI will use in 
 
 ```
 localmind/
-├── app.py                 # Main backend (FastAPI)
-├── LocalMindBox.exe       # Main backend (Executable Windows file)
-├── index.html             # Web UI
-├── static/
-│   ├── style.css          # Styles
-│   ├── main.js            # Frontend logic
-│   └── favicon.ico        # Иконка вкладки браузера
-├── documents/             # Uploaded files
-└── chroma_db/             # Vector knowledge base
+├── app.py                     # Main application (Streamlit UI)
+├── graph_manager.py           # Knowledge Graph logic (NetworkX)
+├── LocalMindBox.exe           # Legacy backend (Executable Windows file)
+├── documents/                 # Uploaded files
+├── chroma_db/                # Vector knowledge base
+└── knowledge_graph.json        # Serialized knowledge graph
 ```
 
 ---
